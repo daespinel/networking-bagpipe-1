@@ -15,9 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_utils import excutils
 
+from os_ken.base import app_manager
+from os_ken.lib import hub
+
+from networking_bagpipe.bagpipe_bgp import bgp_daemon
 from networking_bagpipe.bagpipe_bgp.common import config
 from networking_bagpipe.bagpipe_bgp.common import dataplane_utils
 from networking_bagpipe.bagpipe_bgp.common import log_decorator
@@ -225,7 +232,21 @@ class TunnelManager(dataplane_utils.ObjectLifecycleManager):
         self.bridge.delete_port(tunnel)
 
 
-class OVSDataplaneDriver(dp_drivers.DataplaneDriver):
+def bgp_daemon_wrapper():
+    try:
+        bgp_daemon.daemon_main()
+    except Exception:
+        with excutils.save_and_reraise_exception():
+            LOG.exception("Agent main thread died of an exception")
+    finally:
+        # The following call terminates os-ken's AppManager.run_apps(),
+        # which is needed for clean shutdown of an agent process.
+        # The close() call must be called in another thread, otherwise
+        # it suicides and ends prematurely.
+        hub.spawn(app_manager.AppManager.get_instance().close)
+
+
+class OVSDataplaneDriver(dp_drivers.DataplaneDriver, app_manager.OSKenApp):
 
     dataplane_instance_class = OVSEVIDataplane
     type = consts.EVPN
@@ -244,11 +265,22 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver):
 
         config.set_default_root_helper()
 
+        def _make_br_cls(br_cls):
+            return functools.partial(br_cls, self.config.ovs_bridge,
+                                     os_ken_app=self)
+        bridge_classes = {
+            'br_tun': _make_br_cls(br_tun.OVSTunnelBridge)
+        }
         self.bridge = dataplane_utils.OVSBridgeWithGroups(
-            br_tun.OVSTunnelBridge(self.config.ovs_bridge)
+            bridge_classes['br_tun']()
         )
+
+    def start(self):
+        super(OVSDataplaneDriver, self).start()
+
         self.tunnel_mgr = TunnelManager(self.bridge,
                                         self.get_local_address())
+        return hub.spawn(bgp_daemon_wrapper, raise_error=True)
 
     def needs_cleanup_assist(self):
         return True
@@ -263,3 +295,4 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver):
         return {
             "tunnels": self.tunnel_mgr.infos(),
         }
+
