@@ -20,25 +20,6 @@ eventlet.monkey_patch()
 # Monkey patch the original current_thread to use the up-to-date _active
 # global variable. See https://bugs.launchpad.net/bugs/1863021 and
 # https://github.com/eventlet/eventlet/issues/592
-<<<<<<< HEAD
-import __original_module_threading as orig_threading  # noqa pylint: disable=import-error
-import threading  # noqa
-orig_threading.current_thread.__globals__['_active'] = threading._active
-
-from oslo_concurrency import lockutils  # noqa: E402
-from oslo_config import cfg  # noqa: E402
-from oslo_config import types  # noqa: E402
-from oslo_log import helpers as log_helpers  # noqa: E402
-from oslo_log import log as logging  # noqa: E402
-
-from networking_bagpipe.agent import agent_base_info  # noqa: E402
-from networking_bagpipe.agent import bagpipe_bgp_agent  # noqa: E402
-from networking_bagpipe.bagpipe_bgp import \
-    constants as bbgp_const  # noqa: E402
-
-from neutron.agent.linux import ip_lib  # noqa: E402
-from neutron.common import config as common_config  # noqa: E402
-=======
 import __original_module_threading as orig_threading  # pylint: disable=E0401
 import threading  # noqa
 orig_threading.current_thread.__globals__['_active'] = threading._active
@@ -55,7 +36,7 @@ from networking_bagpipe.bagpipe_bgp import constants as bbgp_const
 
 from neutron.agent.linux import ip_lib
 from neutron.common import config as common_config
->>>>>>> 0e866eed9f6c3e545a2fd6c0b680a718996661a5
+
 from neutron.plugins.ml2.drivers.linuxbridge.agent import \
     linuxbridge_neutron_agent as lnx_agt  # noqa: E402
 
