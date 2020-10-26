@@ -356,6 +356,8 @@ class ExaBGPPeerWorker(bgp_peer_worker.BGPPeerWorker, lg.LookingGlassMixin):
         # (error if state not the right one for sending updates)
         self.log.debug("Sending %d bytes on socket to peer %s",
                        len(data), self.peer_address)
+        if isinstance(type(data), str):
+            data = data.encode('UTF-8')
         try:
             for _unused in self.protocol.connection.writer(data):
                 pass
@@ -369,7 +371,7 @@ class ExaBGPPeerWorker(bgp_peer_worker.BGPPeerWorker, lg.LookingGlassMixin):
         try:
             r = exa_message.Update([event.route_entry.nlri],
                                    event.route_entry.attributes)
-            return ''.join(r.messages(self.protocol.negotiated))
+            return b''.join(r.messages(self.protocol.negotiated))
         except Exception:
             self.log.exception("Exception while generating message for "
                                "route %s", r)
