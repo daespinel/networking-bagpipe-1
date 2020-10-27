@@ -274,7 +274,8 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver, app_manager.OSKenApp):
         self.bridge = dataplane_utils.OVSBridgeWithGroups(
             bridge_classes['br_tun']()
         )
-
+        self.tunnel_mgr = TunnelManager(self.bridge,
+                                        self.get_local_address())
     def start(self):
         super(OVSDataplaneDriver, self).start()
 
