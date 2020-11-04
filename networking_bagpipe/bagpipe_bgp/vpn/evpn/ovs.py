@@ -252,7 +252,7 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver, app_manager.OSKenApp):
     type = consts.EVPN
     ecmp_support = False
     encaps = [exa.Encapsulation(exa.Encapsulation.Type.VXLAN)]
-
+    name = "os_ken.app.ofctl.service"
     driver_opts = [
         cfg.StrOpt("ovs_bridge", default="br-tun",
                    help=("Name of the OVS bridge to use, this has to be the "
@@ -265,6 +265,8 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver, app_manager.OSKenApp):
 
         config.set_default_root_helper()
 
+        #hub.spawn(app_manager.AppManager.get_instance()._instantiate(self, 'ofctl_service')
+
         def _make_br_cls(br_cls):
             return functools.partial(br_cls, self.config.ovs_bridge,
                                      os_ken_app=self)
@@ -276,6 +278,7 @@ class OVSDataplaneDriver(dp_drivers.DataplaneDriver, app_manager.OSKenApp):
         )
         self.tunnel_mgr = TunnelManager(self.bridge,
                                         self.get_local_address())
+                                        
     def start(self):
         super(OVSDataplaneDriver, self).start()
 

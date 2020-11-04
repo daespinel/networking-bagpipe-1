@@ -54,7 +54,7 @@ def setup_logging():
     extra_log_level_defaults = [
         '%s.engine.exabgp_peer_worker.exabgp=INFO' % BAGPIPE_BGP_MODULE,
         '%s.common.looking_glass=WARNING' % BAGPIPE_BGP_MODULE,
-        '%s.engine.route_table_manager=INFO' % BAGPIPE_BGP_MODULE,
+        '%s.engine.route_table_manager=DEBUG' % BAGPIPE_BGP_MODULE,
         'ovsdbapp.backend.ovs_idl.vlog=INFO',
     ]
 
