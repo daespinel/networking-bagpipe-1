@@ -982,7 +982,7 @@ class MPLSOVSDataplaneDriver(dp_drivers.DataplaneDriver):
 
         # check OVS version
         if (not self.vxlan_encap and
-                version.StrictVersion(self.ovs_release) <
+                version.StrictVersion(self.ovs_release.decode('utf-8')) <
                 version.StrictVersion(self.required_ovs_version)):
             self.log.warning("%s requires at least OVS %s"
                              " (you are running %s)",
