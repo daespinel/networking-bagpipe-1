@@ -147,7 +147,7 @@ class DataplaneDriver(lg.LookingGlassLocalLogger, utils.ClassReprMixin):
 
         # Linux kernel version check
         o = self._run_command("uname -r")
-        self.kernel_release = o[0][0].split("-")[0]
+        self.kernel_release = o[0][0].decode('utf-8').split("-")[0]
         if self.required_kernel:
             if (version.StrictVersion(self.kernel_release) <
                     version.StrictVersion(self.required_kernel)):
