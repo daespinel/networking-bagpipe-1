@@ -19,8 +19,9 @@ import logging as python_logging
 import re
 
 from oslo_log import log as logging
-import six
-import urllib
+import urllib.request
+import urllib.parse
+import urllib.error
 
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +39,8 @@ def _split_lg_path(path_prefix, path):
         return (None, None, path_prefix)
     else:
         return (path[0], path[1:],
-                "%s/%s" % (path_prefix, urllib.quote(path[0])))
+                # pylint: disable=no-member
+                "%s/%s" % (path_prefix, urllib.parse.quote(path[0])))
 
 
 def _get_lg_local_info_recurse(obj, cls, path_prefix):
@@ -90,7 +92,8 @@ def _lookup_path(my_dict, path):
 
 def get_lg_prefixed_path(path_prefix, path_items):
     fmt = "%s" + ('/%s' * len(path_items))
-    quoted_path_items = [urllib.quote(path_item) for path_item in path_items]
+    # pylint: disable=no-member
+    quoted_path_items = [urllib.parse.quote(path_item) for path_item in path_items]
     quoted_path_items.insert(0, path_prefix)
     return fmt % tuple(quoted_path_items)
 
@@ -315,7 +318,7 @@ class NoSuchLookingGlassObject(Exception):
 
     def __init__(self, path_prefix, path):
         super(NoSuchLookingGlassObject, self).__init__()
-        assert isinstance(path_prefix, six.string_types)
+        assert isinstance(path_prefix, str)
         self.path_prefix = path_prefix
 
         assert isinstance(path, str)
